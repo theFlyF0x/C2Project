@@ -56,7 +56,7 @@ def upload_file(conn, local_path, remote_path):
     send_command(conn, 'upload', content, remote_path)
 
     upload_status = wait_response(conn)
-    if upload_status == 'done':
+    if upload_status == '1':
         print('\033[92m[INFO] File uploaded successfully!\033[0m')
     else:
         print('\033[93m[WARN] There was an error uploading the file. Error:\n', upload_status, '\033[0m\n')
@@ -65,7 +65,14 @@ def download_file(conn, remote_path):
     print("\033[96m[INFO] Retrieving the requested file...\033[0m")
     send_command(conn, 'download', remote_path)
 
-    f = wait_response(conn) # TODO: to be finished...
+    res = wait_response(conn)
+    if res == '0':
+        print("\033[91m[WARN] The specified file doesn't exist\033[0m")
+    elif res == '1':
+        print("\033[92m[INFO] File successfully downloaded\033[0m")
+    else:
+        print("\033[91m[FAIL] These was a problem:\n", res, "\n\033[0m")
+
     
 def listen_for_connections(server):
     """Continuously listen for new incoming connections"""
