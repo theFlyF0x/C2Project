@@ -15,19 +15,16 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
 
 ### Prerequisites
 
-- Python 3.x
-- [Additional dependencies, if any]
+- Python minimum 3.10
 
 ### Installation
 
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/your-c2-framework.git
-    cd your-c2-framework
+    git clone https://github.com/theFlyF0x/C2Project.git
+    cd C2Project
     ```
-
-2. [Install any additional dependencies]
 
 ### Usage
 

