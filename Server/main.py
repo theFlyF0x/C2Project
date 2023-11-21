@@ -133,7 +133,7 @@ if __name__ == '__main__':
                             shell: Opens a reverse shell on the target
                             upload <local_file> <destination_path>: Uploads a specified file (absolute local path)
                             download <remote_file>: Downloads a file from the remote host
-                            persistence: try to set persistence on the target. Multiple options:\n\tregistry: set persistence in HKCU registry\n\tschtask: set a scheduled task for persistence\n
+                            persistence <mode>: try to set persistence on the target. Multiple options:\n\tregistry: set persistence in HKCU registry\n\tschtask: set a scheduled task for persistence\n
                         """)
                     
                 case 'sessions': 
@@ -179,16 +179,3 @@ if __name__ == '__main__':
                 case _:
                     print("\033[93m[INFO] Not a valid command\033[0m")
 
-
-"""
-Colors (to be removed...):
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-"""

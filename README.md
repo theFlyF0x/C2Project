@@ -10,6 +10,7 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
 - **File Upload:** Upload files from the local system to the target system.
 - **File Download:** Download files from the target system to the local system.
 - **Session Management:** View and switch between active sessions.
+- **Basic Persistence:** Manages persistence on the target host.
 
 ## Getting Started
 
@@ -31,14 +32,11 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
 1. Start the C2 server:
 
     ```bash
-    python c2_server.py
+    python main.py
     ```
 
-2. Connect to the C2 server from the target system:
-
-    ```bash
-    python c2_client.py
-    ```
+2. Compiling the payload:
+    The payload can be compiled with a tool like pyinstaller or Cython
 
 3. Use the provided commands to interact with the target system.
 
@@ -50,8 +48,5 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
 - `shell`: Open a reverse shell on the target system.
 - `upload <local_file> <destination_path>`: Upload a file to the target system.
 - `download <remote_file>`: Download a file from the target system.
+- `persistence <mode>`: Set up persistence on the target host. 
 - `quit`: Exit the C2 framework.
-
-## Contributing
-
-Contributions are welcome! If you find a bug or have a feature request, please open an issue or submit a pull request.
