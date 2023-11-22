@@ -35,8 +35,8 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
     python main.py
     ```
 
-2. Compiling the payload:
-    The payload can be compiled with a tool like pyinstaller or Cython
+2. Using the payload:
+    The Windows payload can be compiled with a tool like pyinstaller or Cython.
 
 3. Use the provided commands to interact with the target system.
 

