@@ -112,11 +112,15 @@ def listen_for_connections(server):
         print(f"\033[92m[INFO] Connection received from {address}\033[0m")
         connections.append([connection, address]) # Appends the connection to the connections list
 
+def print_shrek():
+    fn = open('../art/ascii_art.txt', 'r')
+    print("\033[32m".join([line for line in fn]),"\033[32m")
 
 if __name__ == '__main__':
+    print_shrek()
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((HOST, PORT))
-    print(f"[INFO] Listening on {HOST}:{PORT}")
+    print(f"\033[92m[INFO] Listening on {HOST}:{PORT}\033[0m")
     server.listen(1)
     # Starting a thread which continuously listens for new connections
     threading.Thread(target=listen_for_connections, args=(server, )).start()
