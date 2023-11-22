@@ -6,7 +6,7 @@ import random
 import threading
 import os
 
-HOST = "127.0.0.1" # Address to listen on
+HOST = "0.0.0.0" # Address to listen on
 PORT = 6969 # Port to listen on. (Better to use unprivileged ports)
 
 connections = list() # List of active connections 
