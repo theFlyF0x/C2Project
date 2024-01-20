@@ -3,6 +3,7 @@
 ## Overview
 
 This project is a simple Command and Control (C2) framework implemented in Python. It allows an operator to interact with remote systems through commands sent over a network connection.
+Note that the project is intended for educational purposes only. 
 
 ## Features
 
@@ -10,7 +11,7 @@ This project is a simple Command and Control (C2) framework implemented in Pytho
 - **File Upload:** Upload files from the local system to the target system.
 - **File Download:** Download files from the target system to the local system.
 - **Session Management:** View and switch between active sessions.
-- **Basic Persistence:** Manages persistence on the target host.
+- **Basic Persistence:** Manages persistence on the target host via registries and scheduled tasks. 
 
 ## Getting Started
 

